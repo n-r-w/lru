@@ -43,9 +43,3 @@ func (c *SyncCache[T, X]) Get(key T) (X, bool) {
 	defer c.mutex.Unlock()
 	return c.cache.Get(key)
 }
-
-func (c *SyncCache[T, X]) Top(count int) []*Item[T, X] {
-	c.mutex.RLock()
-	defer c.mutex.Unlock()
-	return c.cache.Top(count)
-}

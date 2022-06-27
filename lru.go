@@ -4,17 +4,20 @@ import (
 	"container/list"
 )
 
+// Cache - LRU кэш, не потокобезопасен
 type Cache[T comparable, X any] struct {
 	capacity int
 	order    list.List
 	data     map[T]*list.Element
 }
 
+// Item - элемент LRU кэша
 type Item[T comparable, X any] struct {
 	Key   T
 	Value X
 }
 
+// New - создать кэш
 func New[T comparable, X any](capacity int) *Cache[T, X] {
 	if capacity < 1 {
 		panic("invalid capacity")
@@ -27,19 +30,23 @@ func New[T comparable, X any](capacity int) *Cache[T, X] {
 	}
 }
 
+// Size - текущий размер кэша
 func (c *Cache[T, X]) Size() int {
 	return len(c.data)
 }
 
+// Size - максимальный размер кэша, после достижения которого, последние элементы начнут удаляться
 func (c *Cache[T, X]) Capacity() int {
 	return c.capacity
 }
 
+// SetCapacity - задать максимальный размер кэша. Лишние элементы будут удалены
 func (c *Cache[T, X]) SetCapacity(capacity int) bool {
 	c.capacity = capacity
 	return c.fixCapacity()
 }
 
+// Insert - добавить элемент
 func (c *Cache[T, X]) Insert(key T, value X) bool {
 	if e, ok := c.data[key]; ok {
 		e.Value.(*Item[T, X]).Value = value
@@ -74,6 +81,7 @@ func (c *Cache[T, X]) fixCapacity() bool {
 	return false
 }
 
+// Get - получить элемент
 func (c *Cache[T, X]) Get(key T) (X, bool) {
 	if e, ok := c.data[key]; ok {
 		c.order.MoveToFront(e)
@@ -84,6 +92,7 @@ func (c *Cache[T, X]) Get(key T) (X, bool) {
 	return res, false
 }
 
+// Top - элементы верхнего уровня
 func (c *Cache[T, X]) Top(count int) []*Item[T, X] {
 	res := []*Item[T, X]{}
 	e := c.order.Front()
